@@ -18,7 +18,6 @@ HREF-DETR 在 RT-DETR-R50 的特征提取与混合编码器中引入四尺度特
 | AMFEM | Adaptive Multi-scale Feature Enhancement Module | `AMFEM` in `lsfem.py` | C3, stride 8 | 多尺度选择、双池化通道重标定、空间筛选与FFN细化 |
 | DSF | Dynamic Semantic Fusion Module | `DSF` in `dsf.py` | Bottom-up PAN fusion nodes | 自适应平衡语义特征与细节特征 |
 
-> 命名说明：代码中的 `c5_enhancer` 是为兼容现有架构保留的配置键；在当前实现中，`AMFEM` 实际增强的是 C3 特征，而不是 C5。
 
 ## Highlights
 
@@ -192,9 +191,6 @@ The current code does not use the undocumented switches `use_mkse`, `use_amfem`,
 
 When switching between three-scale and four-scale models, keep the backbone output shapes, hybrid encoder input levels, transformer `feat_strides`, and `num_levels` mutually consistent.
 
-## Quick Start
-
-Run all commands from the repository root.
 
 ### Train
 
@@ -228,7 +224,7 @@ python tools/train.py \
   -r output/<checkpoint_prefix>
 ```
 
-### Evaluate
+### Eval
 
 ```bash
 python tools/eval.py \
@@ -249,45 +245,12 @@ python tools/infer.py \
 
 Outputs are saved under `output/` by default.
 
-## Troubleshooting
-
-### Out of memory
-
-Start with a batch size of 2 for the four-scale R50 model. Reduce it to 1 if GPU memory is insufficient.
-
-### Dataset class mismatch
-
-Ensure that `num_classes` matches the dataset:
-
-- VisDrone2019-DET: 10 classes
-- AI-TOD-v2: 8 classes
 
 ### Checkpoint loading test
 
 ```bash
 python -c "import paddle; paddle.load('output/best_model.pdparams'); print('OK')"
 ```
-
-### Encoding problems on Windows
-
-This README is saved as UTF-8 without BOM and uses LF line endings. When editing it locally, keep the file encoding set to UTF-8. In VS Code, the encoding is shown in the lower-right corner; select `Save with Encoding` and choose `UTF-8` if necessary.
-
-## Citation
-
-If this repository is useful for your research, please cite the paper after its bibliographic information is finalized:
-
-```bibtex
-@article{sun2026hrefdetr,
-  title   = {HREF-DETR: Hierarchical Representation Enhancement and Adaptive Feature Fusion for Real-Time Small-Object Detection in UAV Aerial Imagery},
-  author  = {Sun, Zhen and others},
-  journal = {Pattern Analysis and Applications},
-  year    = {2026}
-}
-```
-
-> Replace the provisional author list, journal information, year, volume, pages, and DOI after publication. Do not use this provisional entry as the final citation.
-
-Please also cite the original RT-DETR and PaddleDetection projects where appropriate.
 
 ## Acknowledgements
 
