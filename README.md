@@ -77,8 +77,8 @@ pip install -e .
 |   |-- architectures/
 |   |   `-- detr.py
 |   `-- transformers/
-|       |-- lskblock.py
-|       |-- lsfem.py
+|       |-- mkse.py
+|       |-- amfem.py
 |       |-- dsf.py
 |       `-- hybrid_encoder.py
 `-- tools/
@@ -132,34 +132,8 @@ TestDataset:
 
 > The JSON annotation files must use valid COCO category IDs and image paths that match the directory structure above.
 
-### AI-TOD-v2 or a Custom COCO Dataset
 
-1. Prepare the images and COCO-format annotation files.
-2. Create a dataset configuration under `configs/datasets/`.
-3. Set the correct number of classes. AI-TOD-v2 contains 8 foreground classes.
-4. Replace the dataset configuration path in the training entry file.
-5. Verify that category IDs are continuous and compatible with PaddleDetection.
 
-Example:
-
-```yaml
-metric: COCO
-num_classes: 8
-
-TrainDataset:
-  !COCODataSet
-    image_dir: train/images
-    anno_path: aitodv2_train.json
-    dataset_dir: dataset/AI-TOD-v2
-    data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
-
-EvalDataset:
-  !COCODataSet
-    image_dir: val/images
-    anno_path: aitodv2_val.json
-    dataset_dir: dataset/AI-TOD-v2
-    allow_empty: true
-```
 
 ## Paper Configuration
 
