@@ -26,7 +26,7 @@ HREF-DETR 在 RT-DETR-R50 的特征提取与混合编码器中引入四尺度特
 - 使用 AMFEM 对 C3 中层特征进行自适应多尺度增强。
 - 在三个 PAN 自底向上融合节点中加入 DSF。
 - 保持 RT-DETR 查询解码器、匹配策略和损失函数不变。
-- 支持 VisDrone2019-DET，并可适配 AI-TOD-v2 或其他 COCO 格式数据集。
+- 支持 VisDrone2019-DET，并可适配其他 COCO 格式数据集。
 
 ## Environment
 
