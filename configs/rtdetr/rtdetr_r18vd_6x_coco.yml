@@ -1,0 +1,49 @@
+_BASE_: [
+  '../datasets/visdrone_detection.yml',
+  '../runtime.yml',
+  '_base_/optimizer_6x.yml',
+  '_base_/rtdetr_r50vd.yml',
+  '_base_/rtdetr_reader.yml',
+]
+
+# 与 R50 共用 _base_/rtdetr_r50vd.yml 的改进开关：
+# use_4_scale / use_mkse / use_amfem / use_dsf
+# 切回 R50：只需把训练命令 -c 换成 rtdetr_r50vd_6x_coco.yml
+
+weights: output/rtdetr_r18vd_6x_visdrone/model_final
+find_unused_parameters: True
+log_iter: 200
+snapshot_epoch: 2
+eval_epoch: 2
+
+worker_num: 4
+TrainReader:
+  batch_size: 4
+  use_shared_memory: true
+
+EvalReader:
+  batch_size: 8
+
+# ---- 仅 R18 覆盖项（不影响 R50 配置）----
+pretrain_weights: https://paddledet.bj.bcebos.com/models/pretrained/ResNet18_vd_pretrained.pdparams
+
+ResNet:
+  depth: 18
+  variant: d
+  freeze_at: -1
+  freeze_norm: false
+  norm_decay: 0.
+  # return_idx 由 base 的 use_4_scale 自动覆盖，勿手写冲突值
+
+AMFEM:
+  out_channels: 128   # R18 C3=128；R50 仍用 base 里的 512
+
+HybridEncoder:
+  hidden_dim: 256
+  expansion: 0.5
+  depth_mult: 1.0
+  # use_dsf 继承 base，无需重复写
+
+RTDETRTransformer:
+  eval_idx: -1
+  num_decoder_layers: 3   # 官方 R18 为 3；R50 base 为 6

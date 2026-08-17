@@ -1,0 +1,16 @@
+# RT-DETRv2 with ResNet50-vd on VisDrone dataset
+# Schedule: 6x (72 epochs)
+# Num classes: 10 (VisDrone standard)
+
+_BASE_: [
+  '../datasets/visdrone_detection.yml',   # VisDrone uses COCO format
+  '../runtime.yml',
+  '_base_/optimizer_6x.yml',
+  '_base_/rtdetrv2_r50vd.yml',
+  '_base_/rtdetrv2_reader.yml',
+]
+
+
+find_unused_parameters: false
+log_iter: 50
+weights: output/rtdetrv2_r50vd_6x_visdrone/model_final

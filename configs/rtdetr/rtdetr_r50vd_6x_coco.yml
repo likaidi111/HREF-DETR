@@ -1,0 +1,26 @@
+_BASE_: [
+  '../datasets/visdrone_detection.yml',
+  '../runtime.yml',
+  '_base_/optimizer_6x.yml',
+  '_base_/rtdetr_r50vd.yml',
+  '_base_/rtdetr_reader.yml',
+]
+
+weights: output/rtdetr_r50vd_6x_coco/model_final
+find_unused_parameters: True
+log_iter: 200
+snapshot_epoch: 2
+eval_epoch: 2
+
+# ---- GPU 利用率优化（3090 24GB）----
+# 原配置 worker_num=2, batch_size=2, use_shared_memory=false
+# 导致 GPU 空等数据，利用率约 9%
+worker_num: 4
+TrainReader:
+  batch_size: 2
+  use_shared_memory: true
+
+EvalReader:
+  batch_size: 4
+
+
