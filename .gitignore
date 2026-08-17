@@ -1,0 +1,17 @@
+*.pth
+*.pt
+*.pdparams
+*.pdopt
+*.pyc
+.idea
+.vscode
+*.zip
+*.rar
+work/
+*.onnx
+output_inference/
+paddledet.egg-info/
+*.egg-info/
+*.pdiparams
+*.pdiparams.info
+*.pdmodel
