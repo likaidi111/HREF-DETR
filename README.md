@@ -1,12 +1,12 @@
 # HREF-DETR
-code for HREF-DETR Hierarchical Representation Enhancement and Adaptive Feature Fusion for Real-Time Small-Object Detection in UAV Aerial Imagery
-# HREF-DETR: RT-DETR with MKSE, AMFEM, and DSF
+code for HREF-DETR Hierarchical Representation Enhancement and Adaptive Feature Fusion for Real-Time Small-Object Detection in UAV Aerial Imagery 
+# HREF-DETR: Hierarchical Representation Enhancement and Adaptive Feature Fusion for Real-Time Small-Object Detection in UAV Aerial Imagery 
 
 [![PaddlePaddle](https://img.shields.io/badge/PaddlePaddle-2.6.2-blue.svg)](https://www.paddlepaddle.org.cn/)
 [![Python](https://img.shields.io/badge/Python-3.9-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](LICENSE)
 
-基于 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection) 的 RT-DETR 改进实现，面向无人机航拍图像中的小目标检测。
+基于 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection) 的 RT-DETR 改进实现，面向无人机航拍图像中的小目标检测,检测算法的原始代码在master分支下。
 
 HREF-DETR 在 RT-DETR-R50 的特征提取与混合编码器中引入四尺度特征、浅层特征增强和动态特征融合，同时保持查询解码器、匈牙利匹配与训练目标不变。
 
