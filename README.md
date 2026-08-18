@@ -94,9 +94,12 @@ Download the image-based object-detection subset from the [official VisDrone rep
 
 ```text
 dataset/visdrone/
-|-- VisDrone2019-DET-train/
-|-- VisDrone2019-DET-val/
-|-- VisDrone2019-DET-test_dev/
+|-- VisDrone2019-DET-train/annotations
+|-- VisDrone2019-DET-train/images
+|-- VisDrone2019-DET-val/annotations
+|-- VisDrone2019-DET-val/images
+|-- VisDrone2019-DET-test_dev/annotations
+|-- VisDrone2019-DET-test_dev/images
 |-- train_info.json
 |-- val_info.json
 `-- test_dev.json
@@ -112,21 +115,21 @@ TrainDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-train
     anno_path: train_info.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: Your storage location
     data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
 
 EvalDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-val
     anno_path: val_info.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: Your storage location
     allow_empty: true
 
 TestDataset:
   !ImageFolder
     image_dir: VisDrone2019-DET-test_dev
     anno_path: test_dev.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: Your storage location
 ```
 
 > The JSON annotation files must use valid COCO category IDs and image paths that match the directory structure above.
@@ -140,11 +143,20 @@ The paper model uses four backbone outputs with strides 4, 8, 16, and 32. MKSE e
 
 ```yaml
 DETR:
-  c2_enhancer: C2LskEnhancer
+  backbone: ResNet
+  neck: HybridEncoder
+  transformer: RTDETRTransformer
+  detr_head: DINOHead
+  post_process: DETRPostProcess
+  # ---- 尺度 / 模块开关 ----
+  use_4_scale: True        # True=四尺度, False=三尺度（自动改齐相关项）
+  use_mkse: True           # True=启用 MKSE, False=关闭（三尺度时自动关）
+  use_amfem: True          # True=启用 AMFEM, False=关闭
+  c2_enhancer: MKSE
   c5_enhancer: AMFEM
 
-C2LskEnhancer:
-  act: silu
+MKSE:
+  act: 'silu'
 
 AMFEM:
   out_channels: 512
@@ -161,7 +173,6 @@ ResNet:
 
 HybridEncoder:
   use_dsf: true
-  use_cgf: false
 
 RTDETRTransformer:
   feat_strides: [4, 8, 16, 32]
