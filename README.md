@@ -94,12 +94,21 @@ Download the image-based object-detection subset from the [official VisDrone rep
 
 ```text
 dataset/visdrone/
-|-- VisDrone2019-DET-train/annotations
-|-- VisDrone2019-DET-train/images
-|-- VisDrone2019-DET-val/annotations
-|-- VisDrone2019-DET-val/images
-|-- VisDrone2019-DET-test_dev/annotations
-|-- VisDrone2019-DET-test_dev/images
+|--  VisDrone2019-DET-train/
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
+|--  VisDrone2019-DET-val/
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
+|--  VisDrone2019-DET-test_dev/
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
 |-- train_info.json
 |-- val_info.json
 `-- test_dev.json
