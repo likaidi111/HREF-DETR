@@ -4,8 +4,8 @@ num_classes: 10
 TrainDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-train
-    # If `dataset_dir` is set, `anno_path` is treated as relative to it.
     anno_path: train_info.json
+    # Fill in your own path
     dataset_dir: dataset/visdrone
     data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
 
@@ -13,6 +13,7 @@ EvalDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-val
     anno_path: val_info.json
+    # Fill in your own path
     dataset_dir: dataset/visdrone
     allow_empty: true
 
@@ -20,4 +21,5 @@ TestDataset:
   !ImageFolder
     image_dir: VisDrone2019-DET-test_dev
     anno_path: test_dev.json
+    # Fill in your own path
     dataset_dir: dataset/visdrone
