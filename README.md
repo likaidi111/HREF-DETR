@@ -79,10 +79,9 @@ pip install -e .
 |   |   `-- detr.py                       # use_4_scale / use_mkse / use_amfem
 |   `-- transformers/
 |       |-- lskblock.py                   # MKSE registered here (training path)
-|       |-- MKSE.py                       # standalone copy; not used for registration
-|       |-- amfem.py
-|       |-- dsf.py
-|       `-- hybrid_encoder.py            # use_dsf
+|       |-- amfem.py                      # AMFEM 
+|       |-- dsf.py                        # DSF 
+|       `-- hybrid_encoder.py             # use_dsf
 `-- tools/
     |-- train.py
     |-- eval.py
@@ -97,10 +96,22 @@ Download the image-based object-detection subset from the [official VisDrone rep
 
 ```text
 dataset/visdrone/
-|-- VisDrone2019-DET-train/          # images (and optional original .txt labels)
+|-- VisDrone2019-DET-train/
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
 |-- VisDrone2019-DET-val/
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
 |-- VisDrone2019-DET-test_dev/
-|-- train_info.json                  # COCO annotations used by training
+|   |-- annotations/
+|   |   `-- .txt
+|   |-- images/
+|   |   `-- .jpg
+|-- train_info.json
 |-- val_info.json
 `-- test_dev.json
 ```
@@ -115,21 +126,21 @@ TrainDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-train
     anno_path: train_info.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: your local root directory of the VisDrone dataset
     data_fields: ['image', 'gt_bbox', 'gt_class', 'is_crowd']
 
 EvalDataset:
   !COCODataSet
     image_dir: VisDrone2019-DET-val
     anno_path: val_info.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: your local root directory of the VisDrone dataset
     allow_empty: true
 
 TestDataset:
   !ImageFolder
     image_dir: VisDrone2019-DET-test_dev
     anno_path: test_dev.json
-    dataset_dir: dataset/visdrone
+    dataset_dir: your local root directory of the VisDrone dataset
 ```
 
 Set `dataset_dir` to your local VisDrone root. JSON files must use valid COCO category IDs and image paths that match the directories above.
