@@ -94,6 +94,10 @@ pip install -e .
 
 Download the image-based object-detection subset from the [official VisDrone repository](https://github.com/VisDrone/VisDrone-Dataset), convert annotations to COCO JSON, and arrange files as follows:
 
+If you need the VisDrone COCO‑format JSON annotation files used in this project, please download `visdrone_coco_json.zip` from Baidu Netdisk:
+- Link: https://pan.baidu.com/s/16sE78TRnNrCMZmcRW1cKfg?pwd=uq5v
+- Extraction code: `uq5v`
+
 ```text
 dataset/visdrone/
 |-- VisDrone2019-DET-train/
