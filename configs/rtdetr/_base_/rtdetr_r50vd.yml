@@ -16,11 +16,9 @@ DETR:
   transformer: RTDETRTransformer
   detr_head: DINOHead
   post_process: DETRPostProcess
-  # ---- 尺度 / 模块开关 ----
-  use_4_scale: True        # True=四尺度, False=三尺度（自动改齐相关项）
-  use_mkse: True           # True=启用 MKSE, False=关闭（三尺度时自动关）
-  use_amfem: True          # True=启用 AMFEM, False=关闭
-  # ---- 模块类型（一般无需修改）----
+  use_4_scale: True        
+  use_mkse: True           
+  use_amfem: True          
   c2_enhancer: MKSE
   c5_enhancer: AMFEM
 
@@ -50,8 +48,7 @@ ResNet:
 HybridEncoder:
   hidden_dim: 256
   use_encoder_idx: [3]
-  # ---- DSF 模块开关 ----
-  use_dsf: True             # True=启用 DSF, False=关闭
+  use_dsf: True             
   num_encoder_layers: 1
   encoder_layer:
     name: TransformerLayer
