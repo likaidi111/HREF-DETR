@@ -26,49 +26,49 @@ __all__ = ['LskBlock', 'MKSE']
 @serializable
 class LskBlock(nn.Layer):
     """
-    LSKBlock Enhanced - 基于LSNet论文的增强版
+    Enhanced LSKBlock based on the LSNet paper.
     
-    核心改进 (方案2):
-    1. 自适应权重矩阵 (Adaptive Weight Matrix) - 根据输入动态调整
-    2. 空间选择机制 (Spatial Selection) - 全局信息引导
-    3. 大核卷积 (Large Kernel 7x7) - 提供上下文信息
+    Core improvements (Scheme 2):
+    1. Adaptive Weight Matrix — dynamically adjusted by the input
+    2. Spatial Selection — guided by global information
+    3. Large Kernel convolution (7×7) — provides contextual information
     
-    专门优化小目标检测:
-    - 3x3: 精确定位小目标
-    - 5x5: 中等感受野
-    - 7x7: 全局上下文理解
-    - 自适应权重: 小目标时w3大，大目标时w7大
+    Specifically optimized for small-object detection:
+    - 3×3: precise small-object localization
+    - 5×5: medium receptive field
+    - 7×7: global context modeling
+    - Adaptive weights: larger w3 for small objects, larger w7 for large objects
     
     Args:
-        channels (int): 输入和输出的通道数
-        act (str): 激活函数类型,默认'silu'
+        channels (int): number of input and output channels
+        act (str): activation type, default 'silu'
     """
     
     def __init__(self, channels, act="silu"):
         super(LskBlock, self).__init__()
         self.channels = channels
         
-        # ==================== 多尺度分支 ====================
-        # 分支1: 3x3 - 小目标局部细节
+        # ==================== Multi-scale branche ====================
+        # 3×3 — local details of small objects
         self.dw_conv_3 = nn.Conv2D(
             channels, channels, 3, padding=1,
             groups=channels, bias_attr=False)
         self.bn_3 = nn.BatchNorm2D(channels)
         
-        # 分支2: 5x5 - 中等感受野
+        # 5×5 — medium receptive field
         self.dw_conv_5 = nn.Conv2D(
             channels, channels, 5, padding=2,
             groups=channels, bias_attr=False)
         self.bn_5 = nn.BatchNorm2D(channels)
         
-        # 分支3: 7x7 - 大感受野 (LSNet核心)
+        # 7×7 — large receptive field (LSNet core)
         self.dw_conv_7 = nn.Conv2D(
             channels, channels, 7, padding=3,
             groups=channels, bias_attr=False)
         self.bn_7 = nn.BatchNorm2D(channels)
         
-        # ==================== 空间选择 (Spatial Selection) ====================
-        # 捕获全局空间信息
+        # ==================== Spatial Selection ====================
+        # Capture global spatial information
         self.spatial_select = nn.Sequential(
             nn.AdaptiveAvgPool2D(1),
             nn.Conv2D(channels, channels // 4, 1, bias_attr=False),
@@ -76,18 +76,18 @@ class LskBlock(nn.Layer):
             nn.ReLU()
         )
         
-        # ==================== 自适应权重矩阵 ====================
-        # 为3个分支生成自适应权重
+        # ==================== Adaptive weight matrix ====================
+        # Generate adaptive weights for the three branches
         self.attention = nn.Sequential(
             nn.Conv2D(channels // 4, 3, 1, bias_attr=False),
-            nn.Softmax(axis=1)  # 归一化权重 (和为1)
+            nn.Softmax(axis=1)  # Normalize weights (sum to 1)
         )
         
-        # ==================== 特征融合 ====================
+        # ==================== Feature fusion ====================
         self.fusion = nn.Conv2D(channels, channels, 1, bias_attr=False)
         self.bn_fusion = nn.BatchNorm2D(channels)
         
-        # 激活函数
+        # Activation
         if isinstance(act, (str, dict)) or act is None:
             self.act = get_act_fn(act)
         else:
@@ -95,58 +95,58 @@ class LskBlock(nn.Layer):
         
     def forward(self, x):
         """
-        前向传播 - LSNet自适应权重融合
+        Forward pass — LSNet adaptive weight fusion
         
-        流程:
-        1. 多尺度特征提取 (3x3, 5x5, 7x7)
-        2. 空间选择 (全局池化)
-        3. 自适应权重计算 (Softmax归一化)
-        4. 加权融合
-        5. 残差连接
+        Pipeline:
+        1. Multi-scale feature extraction (3x3, 5x5, 7x7)
+        2. Spatial selection
+        3. Adaptive weight computation (Softmax normalization)
+        4. Weighted fusion
+        5. Residual connection
         """
         identity = x
         
-        # ==================== 步骤1: 多尺度特征提取 ====================
-        # 3x3分支 - 小目标局部细节
+        # ====================  Multi-scale feature extraction ====================
+        # 3x3
         feat_3 = self.dw_conv_3(x)
         feat_3 = self.bn_3(feat_3)
         feat_3 = self.act(feat_3)
         
-        # 5x5分支 - 中等感受野
+        # 5x5
         feat_5 = self.dw_conv_5(x)
         feat_5 = self.bn_5(feat_5)
         feat_5 = self.act(feat_5)
         
-        # 7x7分支 - 大感受野 (LSNet核心)
+        # 7x7
         feat_7 = self.dw_conv_7(x)
         feat_7 = self.bn_7(feat_7)
         feat_7 = self.act(feat_7)
         
-        # ==================== 步骤2: 空间选择 ====================
-        # 全局平均池化捕获空间统计信息
+        # ==================== Spatial selection ====================
+        # Global average pooling captures spatial statistics
         spatial_info = self.spatial_select(x)  # [B, C/4, 1, 1]
         
-        # ==================== 步骤3: 自适应权重矩阵 ====================
-        # 为3个分支生成归一化权重
+        # ==================== Adaptive weight matrix ====================
+        # Generate normalized weights for the three branches
         weights = self.attention(spatial_info)  # [B, 3, 1, 1]
         
-        # 分离权重
-        w3 = weights[:, 0:1, :, :]  # [B, 1, 1, 1] - 3x3权重
-        w5 = weights[:, 1:2, :, :]  # [B, 1, 1, 1] - 5x5权重
-        w7 = weights[:, 2:3, :, :]  # [B, 1, 1, 1] - 7x7权重
+        # Split weights
+        w3 = weights[:, 0:1, :, :]  # [B, 1, 1, 1] - 3x3 weights
+        w5 = weights[:, 1:2, :, :]  # [B, 1, 1, 1] - 5x5 weights
+        w7 = weights[:, 2:3, :, :]  # [B, 1, 1, 1] - 7x7 weights
         
-        # ==================== 步骤4: 自适应加权融合 ====================
-        # 根据自适应权重融合三个分支
-        # 小目标: w3权重大 (局部细节)
-        # 大目标: w7权重大 (全局上下文)
+        # ==================== Adaptive weighted fusion ====================
+        # Fuse the three branches with adaptive weights
+        # Small objects: larger w3 (local details)
+        # Large objects: larger w7 (global context)
         out = feat_3 * w3 + feat_5 * w5 + feat_7 * w7
         
-        # 特征融合
+        # Feature fusion
         out = self.fusion(out)
         out = self.bn_fusion(out)
         out = self.act(out)
         
-        # ==================== 步骤5: 残差连接 ====================
+        # ==================== Residual connection ====================
         out = out + identity
         
         return out
@@ -157,15 +157,7 @@ class LskBlock(nn.Layer):
 class MKSE(nn.Layer):
     """
     MKSE: Multi-Kernel Shallow Enhancer
-    C2 (stride=4) 轻量增强：LskBlock 精炼浅层定位特征。
-
-    与 AMFEM（C3 语义增强）分工：
-    - MKSE：高分辨率、小目标定位
-    - AMFEM：中层语义与多尺度注意力
-
-    数据流:
-        C2 → LskBlock → C2'
-        C3/C4/C5 透传 → AMFEM 仅增强 C3
+    Lightweight C2 (stride=4) enhancement: refine shallow localization features with LskBlock.
     """
 
     def __init__(self,
