@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# 独立模块文件（从 lskblock.py 中的 MKSE / LskBlock 复制而来）。
-# 原始 lskblock.py 未修改；当前训练默认仍通过 lskblock 注册 MKSE。
+
 
 """
 MKSE: Multi-Kernel Shallow Enhancer
-
-对外模块为 MKSE；内部依赖 LskBlock（多核自适应卷积算子）。
-数据流: [C2, C3, C4, C5] → 仅增强 C2 → [C2', C3, C4, C5]
+Data flow: [C2, C3, C4, C5] → enhance C2 only → [C2', C3, C4, C5]
 """
 
 import paddle
@@ -34,15 +31,14 @@ __all__ = ['LskBlock', 'MKSE']
 
 class LskBlock(nn.Layer):
     """
-    LskBlock：MKSE 内部算子（多核 3x3 / 5x5 / 7x7 + 自适应加权）。
-    对单张特征图做增强，一般不直接在配置中引用。
+    LskBlock: internal MKSE operator (multi-kernel 3×3 / 5×5 / 7×7 + adaptive weighting).
     """
 
     def __init__(self, channels, act="silu"):
         super(LskBlock, self).__init__()
         self.channels = channels
 
-        # ==================== 多尺度分支 ====================
+        # ==================== Multi-scale branches ====================
         self.dw_conv_3 = nn.Conv2D(
             channels, channels, 3, padding=1,
             groups=channels, bias_attr=False)
@@ -58,7 +54,7 @@ class LskBlock(nn.Layer):
             groups=channels, bias_attr=False)
         self.bn_7 = nn.BatchNorm2D(channels)
 
-        # ==================== 空间选择 ====================
+        # ==================== Spatial selection ====================
         self.spatial_select = nn.Sequential(
             nn.AdaptiveAvgPool2D(1),
             nn.Conv2D(channels, channels // 4, 1, bias_attr=False),
@@ -66,13 +62,13 @@ class LskBlock(nn.Layer):
             nn.ReLU()
         )
 
-        # ==================== 自适应权重 ====================
+        # ==================== Adaptive weights ====================
         self.attention = nn.Sequential(
             nn.Conv2D(channels // 4, 3, 1, bias_attr=False),
             nn.Softmax(axis=1)
         )
 
-        # ==================== 特征融合 ====================
+        # ==================== Feature fusion ====================
         self.fusion = nn.Conv2D(channels, channels, 1, bias_attr=False)
         self.bn_fusion = nn.BatchNorm2D(channels)
 
@@ -105,16 +101,6 @@ class LskBlock(nn.Layer):
 class MKSE(nn.Layer):
     """
     MKSE: Multi-Kernel Shallow Enhancer
-
-    C2 (stride=4) 轻量增强：内部用 LskBlock 精炼浅层定位特征。
-
-    与 AMFEM（C3 语义增强）分工：
-    - MKSE：高分辨率、小目标定位
-    - AMFEM：中层语义与多尺度注意力
-
-    数据流:
-        C2 → LskBlock → C2'
-        C3 / C4 / C5 透传
     """
 
     def __init__(self,
